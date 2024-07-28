@@ -1,9 +1,8 @@
 # OpenAI GPT GUI
-###### this tool is not provided by Openai!
+###### this GUI is not provided by Openai!
+OpenAi GPT GUI is a minimalist, multiplatform tool for interacting with OpenAI's GPT models. The application allows you to send text messages to the GPT API and receive responses. It provides a simple graphical user interface (GUI) built with Tkinter, which can be easily customized or extended to suit specific needs. 
 
 ## Table of Contents
-LocalGPT is a minimalist, multiplatform tool for interacting with OpenAI's GPT models. The application allows you to send text messages to the GPT API and receive responses. It provides a simple graphical user interface (GUI) built with Tkinter, which can be easily customized or extended to suit specific needs. 
-
 1. [Introduction](#introduction)
 2. [Philosophy](#philosophy)
 3. [Features](#features)
