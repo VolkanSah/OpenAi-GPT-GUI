@@ -18,7 +18,7 @@ OpenAi GPT GUI is a minimalist, multiplatform tool for interacting with OpenAI's
 
 ## Philosophy
 
-The motivation behind LocalGPT is to maintain a minimalist approach when interacting with the GPT API. The goal is to avoid the necessity of installing large packages, whether through Docker, npm, or other frameworks, which can be cumbersome and time-consuming. In an age where complexity often overshadows simplicity, LocalGPT strives to remain lightweight and easily extensible. This application serves as a foundational base, easily adaptable for creating desktop applications with interfaces for GPT APIs, especially useful for client projects.
+The motivation behind this GUI is to maintain a minimalist approach when interacting with the GPT API. The goal is to avoid the necessity of installing large packages, whether through Docker, npm, or other frameworks, which can be cumbersome and time-consuming. In an age where complexity often overshadows simplicity, LocalGPT strives to remain lightweight and easily extensible. This application serves as a foundational base, easily adaptable for creating desktop applications with interfaces for GPT APIs, especially useful for client projects.
 
 ## Features
 
@@ -36,11 +36,6 @@ The motivation behind LocalGPT is to maintain a minimalist approach when interac
 ## Installation
 
 1. **Clone the repository or download the project files**:
- ```
-   git clone https://github.com/yourusername/localGPT.git
-   cd localGPT
-```
-
 2. **Install required libraries**:
  ```
    pip install requests
