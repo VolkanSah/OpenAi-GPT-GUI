@@ -6,6 +6,7 @@ from tkinter import scrolledtext, ttk, filedialog
 import json
 import requests
 import base64
+import time
 
 # Load settings
 with open("settings.json") as f:
@@ -13,44 +14,93 @@ with open("settings.json") as f:
 cwd = settings.get("working_directory", ".")
 api_key = settings.get("openai_api_key")
 
-# Function to process GPT response
-def process_gpt_response(response):
-    chat_output.insert(tk.END, f"GPT: {response}\n")
-    log_output.insert(tk.END, f"Response: {response}\n")
-
-# Function to communicate with GPT
-def communicate_with_gpt(message):
-    chat_output.insert(tk.END, f"You: {message}\n")
-    log_output.insert(tk.END, f"Sending message: {message}\n")
-
+def create_assistant():
     try:
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {api_key}"
         }
         data = {
-            "model": model_var.get(),
-            "messages": [{"role": "user", "content": message}],
-            "max_tokens": int(token_entry.get()),
-            "temperature": float(temp_scale.get())
+            "name": "Mein GPT Assistent",
+            "instructions": "Du bist ein hilfreicher Assistent.",
+            "model": model_var.get()
         }
+        response = requests.post("https://api.openai.com/v1/assistants", headers=headers, json=data)
+        assistant = response.json()
+        assistant_id_entry.delete(0, tk.END)
+        assistant_id_entry.insert(0, assistant['id'])
+        return assistant
+    except Exception as e:
+        log_output.insert(tk.END, f"Fehler beim Erstellen des Assistenten: {str(e)}\n")
+        return None
 
-        log_output.insert(tk.END, f"Request Data: {json.dumps(data, indent=2)}\n")
+def create_thread():
+    try:
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}"
+        }
+        response = requests.post("https://api.openai.com/v1/threads", headers=headers)
+        thread = response.json()
+        return thread
+    except Exception as e:
+        log_output.insert(tk.END, f"Fehler beim Erstellen des Threads: {str(e)}\n")
+        return None
 
-        response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=data)
-        response_json = response.json()
-        log_output.insert(tk.END, f"Response Data: {json.dumps(response_json, indent=2)}\n")
-        if "choices" in response_json and response_json["choices"]:
-            reply = response_json["choices"][0]["message"]["content"]
-            process_gpt_response(reply)
-        else:
-            chat_output.insert(tk.END, "No response from GPT\n")
-            log_output.insert(tk.END, "No response from GPT\n")
+def process_gpt_response(response):
+    chat_output.insert(tk.END, f"GPT: {response}\n")
+    log_output.insert(tk.END, f"Response: {response}\n")
+
+def communicate_with_gpt(message):
+    chat_output.insert(tk.END, f"Du: {message}\n")
+    log_output.insert(tk.END, f"Sende Nachricht: {message}\n")
+
+    try:
+        assistant_id = assistant_id_entry.get()
+        if not assistant_id:
+            assistant = create_assistant()
+            if not assistant:
+                return
+            assistant_id = assistant['id']
+
+        thread = create_thread()
+        if not thread:
+            return
+
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}"
+        }
+        message_data = {
+            "role": "user",
+            "content": message
+        }
+        requests.post(f"https://api.openai.com/v1/threads/{thread['id']}/messages", headers=headers, json=message_data)
+
+        run_data = {
+            "assistant_id": assistant_id
+        }
+        run_response = requests.post(f"https://api.openai.com/v1/threads/{thread['id']}/runs", headers=headers, json=run_data)
+        run = run_response.json()
+
+        while True:
+            run_status_response = requests.get(f"https://api.openai.com/v1/threads/{thread['id']}/runs/{run['id']}", headers=headers)
+            run_status = run_status_response.json()
+            if run_status['status'] == 'completed':
+                break
+            time.sleep(1)
+
+        messages_response = requests.get(f"https://api.openai.com/v1/threads/{thread['id']}/messages", headers=headers)
+        messages = messages_response.json()['data']
+        
+        for msg in messages:
+            if msg['role'] == "assistant":
+                process_gpt_response(msg['content'][0]['text']['value'])
+
     except Exception as e:
         chat_output.insert(tk.END, str(e) + '\n')
         log_output.insert(tk.END, str(e) + '\n')
 
-# Function to handle sending text message
 def send_text_message():
     message = chat_input.get("1.0", tk.END).strip()
     if not message:
@@ -60,11 +110,9 @@ def send_text_message():
     chat_input.delete("1.0", tk.END)
     communicate_with_gpt(message)
 
-# Function to clear chat
 def clear_chat():
     chat_output.delete("1.0", tk.END)
 
-# Function to clear logs
 def clear_logs():
     log_output.delete("1.0", tk.END)
 
@@ -104,7 +152,7 @@ tk.Label(settings_frame, text="Settings").pack(pady=10)
 # GPT model selection
 model_label = tk.Label(settings_frame, text="Select GPT Model:")
 model_label.pack()
-model_var = tk.StringVar(value="gpt-4")  # Updated default model to GPT-4
+model_var = tk.StringVar(value="gpt-4")
 model_menu = ttk.Combobox(settings_frame, textvariable=model_var)
 model_menu['values'] = ("gpt-4", "gpt-3.5-turbo", "text-davinci-003", "text-curie-001", "text-babbage-001", "text-ada-001")
 model_menu.pack()
@@ -122,6 +170,16 @@ token_label.pack()
 token_entry = tk.Entry(settings_frame, width=10)
 token_entry.insert(0, "150")
 token_entry.pack()
+
+# Füge einen Button hinzu, um einen neuen Assistenten zu erstellen
+create_assistant_button = tk.Button(settings_frame, text="Neuen Assistenten erstellen", command=create_assistant)
+create_assistant_button.pack()
+
+# Füge ein Feld hinzu, um die Assistent-ID anzuzeigen
+assistant_id_label = tk.Label(settings_frame, text="Assistent ID:")
+assistant_id_label.pack()
+assistant_id_entry = tk.Entry(settings_frame, width=36)
+assistant_id_entry.pack()
 
 # Chat tab content
 chat_output_label = tk.Label(chat_tab, text="Chat Output:")
