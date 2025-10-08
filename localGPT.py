@@ -106,7 +106,7 @@ model_label = tk.Label(settings_frame, text="Select GPT Model:")
 model_label.pack()
 model_var = tk.StringVar(value="gpt-4")  # Updated default model to GPT-4
 model_menu = ttk.Combobox(settings_frame, textvariable=model_var)
-model_menu['values'] = ("gpt-4", "gpt-3.5-turbo", "gpt-3.5-turbo-0125", "gpt-3.5-turbo-1106", "gpt-3.5-turbo-16k", "gpt-4-0125-preview", "gpt-4-0613", "gpt-4-1106-preview", "gpt-4-turbo", "gpt-4-turbo-2024-04-09", "gpt-4-turbo-preview", "gpt-4o", "gpt-4o-2024-05-13", "gpt-4o-2024-08-06", "gpt-4o-mini", "gpt-4o-mini-2024-07-18")
+model_menu['values'] = ("gpt-5", "gpt-5-mini", "gpt-5-nano", "gpt-4o", "gpt-4o-mini", "gpt-4", "gpt-4-0613", "gpt-4-1106-preview", "gpt-4-turbo", "gpt-4-turbo-preview", "gpt-4o-latest", "gpt-4o-mini-high", "gpt-4o-latest-high", "gpt-4o-mini-2024-07-18", "gpt-4o-2024-08-06", "gpt-4o-2024-05-13", "gpt-4o-2024-04-09", "gpt-4o-2024-03-15", "gpt-4o-2024-02-20", "gpt-4o-2024-01-10", "gpt-4o-2023-12-15", "gpt-4o-2023-11-30", "gpt-4o-2023-10-25", "gpt-4o-2023-09-10")
 model_menu.pack()
 
 # Temperature scale
